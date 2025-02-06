@@ -1,19 +1,20 @@
 const express = require('express');
-
+const cors = require('cors');
 const morgan = require('morgan');
+
+const app = express();
+
+app.use(cors());
+// To show HTML req for developer
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+}
 
 // Error handling
 const globalErrorHandler = require('./controllers/globalErrorHandler');
 const AppError = require('./utilities/appError');
 
-const app = express();
-
 const usersRouter = require('./routes/userRoutes');
-
-// To show HTML req for developer
-if (process.env.NODE_ENV === 'development') {
-  app.use(morgan('dev'));
-}
 
 // Body parser (parse the req.body)
 app.use(express.json());
