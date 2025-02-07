@@ -115,11 +115,24 @@ userSchema.pre(/^find/, function (next) {
 
 // document middleware to encrypt password using bcrypt with salt of 12
 userSchema.pre('save', async function (next) {
+  // in document middleware this points to current document
+
+  // isModified and isNew are used to track the changes in document
   if (!this.isModified('password')) next();
 
   this.password = await bcrypt.hash(this.password, 12);
 
   this.passwordConfirm = undefined;
+
+  next();
+});
+
+// document middleware to add passwordChangedAt field before saving the doc.
+userSchema.pre('save', function (next) {
+  if (!this.isModified('password')) return next();
+
+  // because hashing the password using bcrypt takes time
+  this.passwordChangedAt = Date.now() - 1000;
 
   next();
 });
@@ -140,6 +153,18 @@ userSchema.methods.createPasswordResetToken = function () {
 
   this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
   return resetToken;
+};
+
+userSchema.methods.checkPasswordChanged = function (jwtTimestamp) {
+  if (this.passwordChangedAt) {
+    // convert it into minutes
+    const changedTimestamp = parseInt(
+      this.passwordChangedAt.getTime() / 1000,
+      10,
+    );
+    return jwtTimestamp < changedTimestamp;
+  }
+  return false;
 };
 
 const User = mongoose.model('User', userSchema);

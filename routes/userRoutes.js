@@ -10,8 +10,12 @@ router.post('/signup', authController.signup);
 router.get('/logout', authController.logOut);
 
 router.post('/forgotPassword', authController.forgotPassword);
+router.patch('/resetPassword/:token', authController.resetPassword);
 
-router.route('/').get(userController.getUsersData);
+router
+  .route('/')
+  .get(authController.protect, userController.getUsersData)
+  .post(authController.protect, userController.addTask);
 router.route('/:id').get(userController.getUserData);
 
 module.exports = router;

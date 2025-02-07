@@ -28,3 +28,21 @@ exports.getUserData = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+exports.addTask = catchAsync(async (req, res, next) => {
+  const newTask = req.body;
+
+  const user = await User.findById({ _id: req.user._id });
+
+  user.tasks.push(newTask);
+
+  // to turn off the validation before save the doc
+  await user.save({ validateBeforeSave: false });
+
+  res.status(201).json({
+    status: 'success',
+    data: {
+      user,
+    },
+  });
+});
