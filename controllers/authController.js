@@ -64,6 +64,8 @@ exports.signup = catchAsync(async (req, res, next) => {
     // HttpOnly flag set so it is not accessible by JavaScript on the client side.
     // The HttpOnly flag helps prevent XSS attacks.
     httpOnly: true,
+    secure: true,
+    sameSite: 'none',
   };
 
   if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
@@ -98,7 +100,7 @@ exports.login = async (req, res, next) => {
   });
 
   const cookieOptions = {
-    expiresIn: new Date(
+    expires: new Date(
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000,
     ),
     httpOnly: true,
@@ -107,6 +109,7 @@ exports.login = async (req, res, next) => {
     // essential for different domains or ports
     // (like frontend and backend running on different ports during development).
     sameSite: 'none',
+    secure: 'true',
   };
 
   if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
@@ -129,6 +132,8 @@ exports.logOut = (req, res) => {
   res.cookie('jwt', 'loggedOut', {
     expires: new Date(Date.now() + 10000),
     httpOnly: true,
+    sameSite: 'none',
+    secure: 'true',
   });
 
   res.status(200).json({ status: 'success' });
